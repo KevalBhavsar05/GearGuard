@@ -7,6 +7,7 @@ import connectDB from "./config/config.js";
 import authRoutes from "./src/routes/auth.routes.js";
 import equipmentRoutes from "./src/routes/equipment.routes.js";
 import maintenanceteamRoutes from "./src/routes/maintananceteam.routes.js";
+import maintenancereqRoutes from "./src/routes/maintanancereq.routes.js";
 const app = express();
 
 const allowedOrigins = [
@@ -37,7 +38,7 @@ app.use("/api/equipment", equipmentRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/maintenance/team", maintenanceteamRoutes);
-
+app.use("/api/maintanancereq", maintenancereqRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

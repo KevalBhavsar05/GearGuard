@@ -1,39 +1,25 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  ArrowLeftIcon,
   ChevronDownIcon,
   CheckIcon,
-  WrenchScrewdriverIcon,
-  CalendarDaysIcon,
-  ClockIcon,
-  BuildingOfficeIcon,
-  UserGroupIcon,
   TagIcon,
-  ChatBubbleBottomCenterIcon,
-  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 import EmpHeader from "../components/emp/EmpHeader";
 import EmpFooter from "../components/emp/EmpFooter";
 import { useGetEquipmentsByDeptAndCompany } from "@/hooks/useEquipment";
-
-const departments = [
-  { id: "64f300000000000000000002", name: "Engineering" },
-  { id: "65a2", name: "Quality Control" },
-];
-
-const teams = [
-  { id: "64f500000000000000000102", name: "Precision Mechanics" },
-  { id: "65b2", name: "Electrical Engineering" },
-];
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useCreateReq } from "@/hooks/useReq";
+import { useApp } from "@/contexts/AppContext";
 
 const RaiseComplaintPage = () => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
-
+  const { user } = useApp();
   const [isEqOpen, setIsEqOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEq, setSelectedEq] = useState(null);
@@ -44,6 +30,8 @@ const RaiseComplaintPage = () => {
   const { data } = useGetEquipmentsByDeptAndCompany();
   const equipments = data?.equipments || [];
 
+  const queryClient = useQueryClient();
+  const mutation = useCreateReq();
   /* ---------------- CLOSE DROPDOWN ON OUTSIDE CLICK ---------------- */
   useEffect(() => {
     const handler = (e) => {
@@ -55,7 +43,7 @@ const RaiseComplaintPage = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* ---------------- AUTO-FILL WHEN EQUIPMENT CHANGES ---------------- */
+  /* ---------------- AUTO-FILL FROM EQUIPMENT ---------------- */
   useEffect(() => {
     if (!selectedEq) return;
 
@@ -72,18 +60,6 @@ const RaiseComplaintPage = () => {
     );
   }, [equipments, searchTerm]);
 
-  /* ---------------- SUBMIT ---------------- */
-  const mutation = useMutation({
-    mutationFn: async (payload) => {
-      console.log("Submitting payload:", payload);
-      return new Promise((res) => setTimeout(res, 1000));
-    },
-    onSuccess: () => {
-      toast.success("Request Logged Successfully");
-      navigate("/employee-dashboard");
-    },
-  });
-
   const onSubmit = (e) => {
     e.preventDefault();
 
@@ -96,18 +72,35 @@ const RaiseComplaintPage = () => {
     const data = Object.fromEntries(fd);
 
     const payload = {
-      ...data,
+      subject: data.subject,
+      request_type: data.request_type,
+      notes: data.notes || "",
+      scheduled_date: data.scheduled_date || null,
+      duration_hours: data.duration_hours || null,
+
       equipment_id: selectedEq._id,
-      department_id: departmentId,
-      maintenance_team_id: maintenanceTeamId,
+      department_id: selectedEq.department_id._id,
+      maintenance_team_id: selectedEq.maintenance_team_id,
     };
 
-    mutation.mutate(payload);
+    console.log(payload);
+    mutation.mutate(payload, {
+      onSuccess: () => {
+        toast.success("Maintenance request created successfully");
+        navigate("/employee-dashboard");
+      },
+      onError: (error) => {
+        console.log(error);
+
+        toast.error("Failed to create maintenance request");
+      },
+    });
+
   };
 
   return (
     <div className="min-h-screen bg-[#FBFDFF] flex flex-col">
-      <EmpHeader empName="Alexander" empId="ID: #8821" />
+      <EmpHeader empName={user?.email || "Employee"} empId={`ID: #${user?.employeeId || "8821"}`} />
 
       <main className="flex-grow max-w-[1400px] mx-auto w-full px-4 py-8">
         <form
@@ -117,21 +110,22 @@ const RaiseComplaintPage = () => {
           {/* ---------------- LEFT ---------------- */}
           <div className="lg:col-span-8 space-y-6">
             {/* SUBJECT */}
-            <div className="bg-white rounded-3xl p-8 shadow-sm">
-              <input
+            <div className="bg-white rounded-3xl p-8 shadow-sm relative">
+              <Input
+                type={"text"}
                 name="subject"
                 required
                 placeholder="Briefly describe the issue..."
                 className="w-full bg-slate-50 rounded-xl py-4 px-12 text-lg"
               />
-              <TagIcon className="h-6 w-6 text-slate-300 absolute" />
+              <TagIcon className="h-6 w-6 text-slate-300 absolute left-12 top-10" />
             </div>
 
             {/* EQUIPMENT SELECT */}
             <div className="relative" ref={dropdownRef}>
               <div
                 onClick={() => setIsEqOpen(!isEqOpen)}
-                className="bg-slate-50 rounded-xl py-4 px-12 cursor-pointer flex justify-between"
+                className="bg-slate-50 rounded-xl py-4 px-6 cursor-pointer flex justify-between items-center"
               >
                 <div>
                   <p className="font-semibold">
@@ -178,11 +172,11 @@ const RaiseComplaintPage = () => {
               )}
             </div>
 
-            {/* DESCRIPTION */}
-            <textarea
+            {/* NOTES */}
+            <Textarea
               name="notes"
               rows="5"
-              placeholder="Describe the issue..."
+              placeholder="Describe the issue in detail..."
               className="w-full bg-slate-50 rounded-xl p-6"
             />
           </div>
@@ -192,58 +186,55 @@ const RaiseComplaintPage = () => {
             {/* TYPE */}
             <select
               name="request_type"
-              className="w-full bg-slate-50 rounded-xl py-3 px-10"
+              className="w-full bg-slate-50 rounded-xl py-3 px-6"
             >
               <option value="Corrective">Corrective Maintenance</option>
               <option value="Preventive">Preventive Maintenance</option>
             </select>
 
-            {/* DEPARTMENT */}
+            {/* DEPARTMENT (AUTO-FILLED) */}
             <select
-              name="department_id"
               value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
-              className="w-full bg-slate-50 rounded-xl py-3 px-10"
+              disabled
+              className="w-full bg-slate-100 rounded-xl py-3 px-6 cursor-not-allowed"
             >
-              <option value="">Select Department</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
+              <option value={departmentId}>
+                {selectedEq?.department_id?.name || "Department"}
+              </option>
             </select>
 
-            {/* TEAM */}
+            {/* MAINTENANCE TEAM (AUTO-FILLED) */}
             <select
-              name="maintenance_team_id"
               value={maintenanceTeamId}
-              onChange={(e) => setMaintenanceTeamId(e.target.value)}
-              className="w-full bg-slate-50 rounded-xl py-3 px-10"
+              disabled
+              className="w-full bg-slate-100 rounded-xl py-3 px-6 cursor-not-allowed"
             >
-              <option value="">Select Team</option>
-              {teams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
+              <option value={maintenanceTeamId}>
+                Assigned Maintenance Team
+              </option>
             </select>
 
             {/* TIMING */}
-            <input
+            <Input
               type="date"
               name="scheduled_date"
-              className="w-full bg-slate-50 rounded-xl py-3 px-10"
+              className="w-full bg-slate-50 rounded-xl py-3 px-6"
             />
-            <input
+            <Input
               type="number"
               name="duration_hours"
-              placeholder="Hours"
-              className="w-full bg-slate-50 rounded-xl py-3 px-10"
+              placeholder="Estimated hours"
+              min="0"
+              className="w-full bg-slate-50 rounded-xl py-3 px-6"
             />
 
             <button
               disabled={mutation.isPending}
-              className="w-full bg-indigo-500 text-white py-4 rounded-xl font-bold"
+              className={`w-full px-6 py-4 rounded-full cursor-pointer text-lg font-semibold transition-all duration-200
+    ${mutation.isPending
+                  ? "bg-blue-300 text-white cursor-not-allowed shadow"
+                  : "bg-blue-950 text-white shadow hover:bg-blue-900 hover:shadow-lg"
+                }`}
             >
               {mutation.isPending ? "Submitting..." : "Log Maintenance Request"}
             </button>

@@ -52,7 +52,7 @@ const Login = () => {
       onError: (error) => {
         toast.error(
           error.response?.data?.message ||
-            "Login Failed. Please check your credentials."
+          "Login Failed. Please check your credentials."
         );
         setUserData({ email: "", password: "" });
       },
@@ -75,7 +75,7 @@ const Login = () => {
       onError: (error) => {
         toast.error(
           error.response?.data?.message ||
-            "Failed to send OTP. Please check your email."
+          "Failed to send OTP. Please check your email."
         );
       },
     });
@@ -101,7 +101,7 @@ const Login = () => {
         onError: (error) => {
           toast.error(
             error.response?.data?.message ||
-              "Registration Failed. Please try again."
+            "Registration Failed. Please try again."
           );
           setOtp("");
         },
@@ -137,11 +137,10 @@ const Login = () => {
                       type="button"
                       onClick={() => setLoginPage(true)}
                       className={`cursor-pointer px-6 py-2 rounded-full text-lg font-semibold transition-all duration-200
-                                                    ${
-                                                      loginPage
-                                                        ? "bg-white text-blue-800 shadow"
-                                                        : "text-gray-500 hover:text-blue-700"
-                                                    }`}
+                                                    ${loginPage
+                          ? "bg-white text-blue-800 shadow"
+                          : "text-gray-500 hover:text-blue-700"
+                        }`}
                     >
                       Login
                     </button>
@@ -150,11 +149,10 @@ const Login = () => {
                       type="button"
                       onClick={() => setLoginPage(false)}
                       className={`cursor-pointer px-6 py-2 rounded-full text-lg font-semibold transition-all duration-200 
-                                                ${
-                                                  !loginPage
-                                                    ? "bg-white text-blue-800 shadow"
-                                                    : "text-gray-500 hover:text-blue-700"
-                                                }`}
+                                                ${!loginPage
+                          ? "bg-white text-blue-800 shadow"
+                          : "text-gray-500 hover:text-blue-700"
+                        }`}
                     >
                       Register
                     </button>
@@ -304,17 +302,28 @@ const Login = () => {
                                 className="w-32 h-32 rounded-full bg-white border-2 p-2 border-white shadow-md mb-6"
                             /> */}
               <motion.h2
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 1.5,
-                  ease: "easeInOut",
+                  duration: 1.1,
+                  ease: "easeOut",
                   delay: 0.3,
                 }}
-                className="text-2xl font-bold tracking-wide text-center drop-shadow-md"
+                className="
+    text-3xl
+    md:text-4xl
+    font-extrabold
+    tracking-[0.3em]
+    uppercase
+    text-white
+    text-center
+    drop-shadow-[0_4px_10px_rgba(0,0,0,0.6)]
+    select-none
+  "
               >
-                ODOO
+                GearGuard
               </motion.h2>
+
             </div>
           </CardContent>
         </Card>
