@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import { genToken } from "../utils/generateToken.js";
 import transporter from "../../config/nodemailer.js";
+import Employee from "../models/employees.model.js";
 
 export const sendVerificationOtp = async (req, res) => {
   try {
@@ -12,6 +13,22 @@ export const sendVerificationOtp = async (req, res) => {
         message: "All fields are required",
       });
     }
+
+    const emp = await Employee.findOne({ email: email });
+    if (!emp) {
+      return res.status(400).json({
+        success: false,
+        message: "You are not authorized to register",
+      });
+    }
+
+    if (emp.userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User already registered with this email",
+      });
+    }
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpMailData = {
       from: `"AuthSystem" <${process.env.SENDER_EMAIL}>`,
@@ -113,6 +130,9 @@ export const register = async (req, res) => {
     user.isVerified = true;
     await user.save();
 
+    const emp = await Employee.findOne({ email: email });
+    emp.userId = user._id;
+    await emp.save();
     // const mailData = {
     //   from: `"AuthSystem" <${process.env.SENDER_EMAIL}>`,
     //   to: email,
