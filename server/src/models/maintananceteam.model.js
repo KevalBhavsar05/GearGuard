@@ -31,6 +31,16 @@ const maintenanceTeamSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+    },
+    
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+    },
   },
   {
     timestamps: true,
