@@ -11,8 +11,6 @@ export default function MaintenanceDashboard() {
   const [data, setData] = useState(null);
   const navigate = useNavigate();
   const { user } = useApp();
-  console.log(user);
-
   const dummyDashboardData = {
     totalRequests: 24,
     totalCompanies: 78, // Added per mockup requirement

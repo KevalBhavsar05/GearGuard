@@ -21,6 +21,8 @@ import AdminDashboard from "./pages/AdminDashboard.jsx";
 import RaiseComplaintPage from "./pages/RaiseComplaintPage.jsx";
 import MaintenanceCalendar from "./pages/MaintenanceCalendar.jsx";
 import AdminRoutes from "./routes/AdminRoutes";
+import EquipmentPage from "./pages/EquipmentPage";
+import ReportPage from "./pages/ReportPage";
 
 // Initialize TanStack Query Client
 const queryClient = new QueryClient();
@@ -68,6 +70,8 @@ function App() {
             }
           >
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/equipment" element={<EquipmentPage />} />
+            <Route path="/admin/reporting" element={<ReportPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
