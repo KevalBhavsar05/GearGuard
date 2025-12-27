@@ -21,6 +21,10 @@ const equipmentSchema = new mongoose.Schema(
       ref: "Department",
     },
 
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+    },
     assigned_to: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // employee / owner
