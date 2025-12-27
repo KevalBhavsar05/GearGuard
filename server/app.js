@@ -5,7 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/config.js";
 import authRoutes from "./src/routes/auth.routes.js";
-
+import equipmentRoutes from "./src/routes/equipment.routes.js";
 const app = express();
 
 const allowedOrigins = [
@@ -31,6 +31,8 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send("Backend server is running..");
 });
+
+app.use("/api/equipment", equipmentRoutes);
 
 app.use("/api/auth", authRoutes);
 
