@@ -37,7 +37,7 @@ app.get("/", (req, res) => {
 app.use("/api/equipment", equipmentRoutes);
 
 app.use("/api/auth", authRoutes);
-app.use("/api/maintenance/team", maintenanceteamRoutes);
+app.use("/api/maintenance", maintenanceteamRoutes);
 app.use("/api/maintanancereq", maintenancereqRoutes);
 
 const PORT = process.env.PORT;

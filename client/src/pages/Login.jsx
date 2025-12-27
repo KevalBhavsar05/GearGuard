@@ -47,6 +47,8 @@ const Login = () => {
           navigate("/employee-dashboard");
         } else if (data.user.role === "ADMIN") {
           navigate("/admin/dashboard");
+        } else if (data.user.role === "TECHNICIAN") {
+          navigate("/technician/dashboard");
         }
       },
       onError: (error) => {

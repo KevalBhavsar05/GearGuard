@@ -1,8 +1,7 @@
 import { DndContext } from "@dnd-kit/core";
 import { STAGES } from "../../utils/stages";
 import KanbanColumn from "./KanbanColumn";
-
-export default function KanbanBoard({ requests, setRequests }) {
+export default function KanbanBoard({ requests, setRequests, onCardClick }) {
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over) return;
@@ -24,6 +23,7 @@ export default function KanbanBoard({ requests, setRequests }) {
             key={stage.id}
             stage={stage}
             requests={requests.filter(r => r.stage === stage.id)}
+            onCardClick={onCardClick}
           />
         ))}
       </div>

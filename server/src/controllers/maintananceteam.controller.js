@@ -47,28 +47,35 @@ import mongoose from "mongoose";
 
 export const getTechnicianEquipmentByStage = async (req, res) => {
   try {
-    
     const technicianId = req.user._id;
-    console.log("Technician ID:", technicianId);
-   
-    const result = await maintenanceRequestModel.aggregate([
-      {
-        $match: {
-          technician_id: new mongoose.Types.ObjectId(technicianId),
-        },
-      },
-      {
-        $group: {
-          _id: "$stage",
-          requests: { $push: "$$ROOT" },
-        },
-      },
-    ]);
+
+    // 1️⃣ Find & populate using model refs
+    const requests = await maintenanceRequestModel
+      .find({ technician_id: technicianId })
+      .populate("equipment_id")          // equipment.model.js
+      .populate("department_id")         // department.model.js
+      .populate("maintenance_team_id")   // maintananceteam.model.js
+      .lean();
+
+    // 2️⃣ Group by stage
+    const grouped = requests.reduce((acc, req) => {
+      const stage = req.stage || "New";
+      acc[stage] = acc[stage] || [];
+      acc[stage].push(req);
+      return acc;
+    }, {});
+
+    // 3️⃣ Format response
+    const result = Object.keys(grouped).map(stage => ({
+      _id: stage,
+      requests: grouped[stage],
+    }));
 
     res.status(200).json({
       message: "Equipment grouped by stage",
       data: result,
     });
+
   } catch (error) {
     res.status(500).json({
       message: "Server Error",
